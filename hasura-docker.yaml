@@ -1,0 +1,43 @@
+version: '3.6'
+services:
+  ## Install postgres database : start
+  postgres:
+    image: postgres:12
+    container_name: postgres
+    restart: always
+    volumes:
+    - db_data:/var/lib/postgresql/data
+  ## Install postgres database : end
+  
+  ## Install pgadmin : start  
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    depends_on:
+    - postgres
+    ports:
+    - 5050:80    
+    environment:
+      PGADMIN_DEFAULT_EMAIL: test@gmail.com 
+      PGADMIN_DEFAULT_PASSWORD: testpassword
+  ## Install pgadmin : end
+  
+  ## Install graphql-engine : start
+  ## Here you need to change HASURA_GRAPHQL_DATABASE_URL
+  ## you need to replace user_name, password, existing_postgres_database_url & database_name
+  graphql-engine:
+    image: hasura/graphql-engine:v1.3.1
+    container_name: hasura
+    ports:
+    - "8080:8080"
+    depends_on:
+    - postgres
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgresql://user_name:password@existing_postgres_database_url/database_name
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
+  ## Install graphql-engine : end    
+volumes:
+  db_data:
